@@ -96,6 +96,12 @@ src/lib/               Data access (Prisma queries), auth/session helpers, forma
 src/proxy.ts           Route protection for /admin/* (Next.js's middleware replacement)
 ```
 
+## Deploying (e.g. Vercel)
+
+- Set `DATABASE_URL`, `DIRECT_URL`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, and `SESSION_SECRET` as environment variables on the hosting platform — the build will fail without them, since the home, cart, and checkout pages query the database at build time.
+- `npm run build` runs `prisma generate` automatically via the `postinstall` script, so the generated client (`src/generated/prisma`, which is gitignored) is always rebuilt from `prisma/schema.prisma` on a fresh install.
+- Run `npm run db:deploy` (applies existing migrations, non-interactive) against the target database before or during your first deploy. `db:migrate` is for local development only — it prompts and can create new migrations.
+
 ## Notes
 
 - Every table, index, and enum type this app owns is prefixed with `pps_`, so it won't conflict with existing tables in a shared Supabase project.
