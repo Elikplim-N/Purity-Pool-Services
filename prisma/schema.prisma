@@ -7,8 +7,11 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
+
+// All tables are prefixed with `pps_` (via @@map) because they live in a
+// shared Supabase project alongside tables from other apps.
 
 model Category {
   id          String    @id @default(cuid())
@@ -19,6 +22,8 @@ model Category {
   products    Product[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+
+  @@map("pps_categories")
 }
 
 model Product {
@@ -40,6 +45,7 @@ model Product {
   updatedAt      DateTime    @updatedAt
 
   @@index([categoryId])
+  @@map("pps_products")
 }
 
 enum OrderStatus {
@@ -47,24 +53,28 @@ enum OrderStatus {
   PROCESSING
   COMPLETED
   CANCELLED
+
+  @@map("pps_order_status")
 }
 
 model Order {
-  id            String      @id @default(cuid())
-  orderNumber   String      @unique
-  customerName  String
-  email         String
-  phone         String
-  address       String
-  city          String
-  state         String?
-  postalCode    String?
-  notes         String?
-  status        OrderStatus @default(PENDING)
-  subtotal      Float
-  items         OrderItem[]
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  id           String      @id @default(cuid())
+  orderNumber  String      @unique
+  customerName String
+  email        String
+  phone        String
+  address      String
+  city         String
+  state        String?
+  postalCode   String?
+  notes        String?
+  status       OrderStatus @default(PENDING)
+  subtotal     Float
+  items        OrderItem[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@map("pps_orders")
 }
 
 model OrderItem {
@@ -78,4 +88,5 @@ model OrderItem {
   quantity    Int
 
   @@index([orderId])
+  @@map("pps_order_items")
 }

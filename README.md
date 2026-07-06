@@ -1,6 +1,6 @@
 # Purity Pool Services
 
-A clean, professional e-commerce storefront for a pool supplies business, built with Next.js (App Router), TypeScript, Tailwind CSS, and Prisma/SQLite.
+A clean, professional e-commerce storefront for a pool supplies business, built with Next.js (App Router), TypeScript, Tailwind CSS, and Prisma with a Supabase (Postgres) database.
 
 It includes a full storefront with a cart and checkout (no payment processor yet — orders are placed and confirmed by staff afterward), plus an admin dashboard for managing products, categories, and orders.
 
@@ -20,7 +20,7 @@ It includes a full storefront with a cart and checkout (no payment processor yet
 - [Next.js 16](https://nextjs.org) (App Router, Server Actions, `proxy.ts` for route protection)
 - TypeScript
 - Tailwind CSS v4
-- Prisma ORM 7 with a SQLite database (via the `@prisma/adapter-libsql` driver adapter)
+- Prisma ORM 7 with Supabase Postgres (via the `@prisma/adapter-pg` driver adapter)
 - [jose](https://github.com/panva/jose) for signing the admin session cookie
 - [zod](https://zod.dev) for form validation
 - [lucide-react](https://lucide.dev) for icons
@@ -33,13 +33,18 @@ Install dependencies:
 npm install
 ```
 
-Copy the example environment file and adjust as needed:
+Copy the example environment file and fill in your Supabase connection strings (Supabase dashboard → Project Settings → Database → Connection string):
 
 ```bash
 cp .env.example .env
 ```
 
-Create the database and apply the schema:
+- `DATABASE_URL` — the **pooled** connection string (port 6543, with `?pgbouncer=true`). Used by the app at runtime; required for serverless deployments.
+- `DIRECT_URL` — the **direct** connection string (port 5432). Used by Prisma migrations only.
+
+All tables this app creates are prefixed with `pps_` (e.g. `pps_products`, `pps_categories`), so it can safely share a Supabase project with other apps.
+
+Apply the schema to your database:
 
 ```bash
 npm run db:migrate
@@ -76,7 +81,7 @@ Change `ADMIN_EMAIL`, `ADMIN_PASSWORD`, and `SESSION_SECRET` before deploying an
 | `npm run build`       | Production build                                |
 | `npm run start`       | Run the production build                        |
 | `npm run lint`        | Lint the project                                |
-| `npm run db:migrate`  | Apply Prisma migrations (creates the SQLite db) |
+| `npm run db:migrate`  | Apply Prisma migrations to the database         |
 | `npm run db:seed`     | Seed sample categories and products             |
 | `npm run db:studio`   | Open Prisma Studio to browse/edit data directly |
 
@@ -93,6 +98,8 @@ src/proxy.ts           Route protection for /admin/* (Next.js's middleware repla
 
 ## Notes
 
-- The SQLite database file (`prisma/dev.db`) is not committed — run the migrate/seed commands above to create it locally.
+- Every table, index, and enum type this app owns is prefixed with `pps_`, so it won't conflict with existing tables in a shared Supabase project.
+- For local development without Supabase, any Postgres instance works — point both `DATABASE_URL` and `DIRECT_URL` at it.
 - Product images are optional; if a product has no `image` URL, its category icon is shown on a gradient placeholder instead.
 - Payments are intentionally not integrated. Placing an order reserves stock and creates an order record for staff follow-up.
+- A natural next step is Supabase Storage for real product photo uploads (the admin form currently takes an image URL).
