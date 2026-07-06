@@ -56,6 +56,8 @@ Seed the database with sample categories and products:
 npm run db:seed
 ```
 
+No local clone? `prisma/seed.sql` contains the same seed data as plain SQL — paste its contents into the Supabase SQL Editor and run it directly (it upserts by slug, so it's safe to run more than once). Regenerate it after changing `prisma/seed-data.ts` with `npm run db:seed:sql`.
+
 Start the dev server:
 
 ```bash
